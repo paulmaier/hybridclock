@@ -19,7 +19,7 @@ bibentry(
   title = "hybridclock: Dating hybrid populations beyond F2, with or without a genetic map",
   author = person("Paul A.", "Maier"),
   year = "2026",
-  note = "Molecular Ecology Resources, in review. The volume, pages and DOI will be added here on publication.",
+  note = "Manuscript in preparation. The journal, volume, pages and DOI will be added here on publication.",
   textVersion = paste("Maier PA (2026) hybridclock: Dating hybrid populations beyond F2, with or",
-                      "without a genetic map. Molecular Ecology Resources, in review.")
+                      "without a genetic map. Manuscript in preparation.")
 )

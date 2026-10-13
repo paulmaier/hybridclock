@@ -102,7 +102,7 @@ how much of it comes from the data rather than from the settings.
 
 hybridclock was validated on 23 published datasets in which the age of the
 hybrids is known exactly or bounded by a documented date of contact (Maier,
-in review). In 41 groups of known age, from F1 families to the 56th
+in preparation). In 41 groups of known age, from F1 families to the 56th
 generation of an advanced intercross line, every 90% interval contained the
 true age. Young groups were dated within 0.26 generations on average, and
 intercross lines within 5.8%. Of 59 wild groups with an upper bound, 57
@@ -116,7 +116,7 @@ If you use hybridclock, **please cite both**:
   between *Anaxyrus boreas* × *canorus* within Eldorado National Forest:
   the first genomic assessment. Final report to the US Forest Service.
 - Maier PA (2026) hybridclock: Dating hybrid populations beyond F2, with or
-  without a genetic map. *Molecular Ecology Resources*, in review.
+  without a genetic map. Manuscript in preparation.
 
 `citation("hybridclock")` gives both entries.
 
