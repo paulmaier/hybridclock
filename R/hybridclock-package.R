@@ -14,4 +14,6 @@
 #' [train_clock()] and [estimate_history()] for populations.
 #'
 #' @keywords internal
+#' @importFrom Cubist cubist
+#' @importFrom ranger ranger
 "_PACKAGE"
