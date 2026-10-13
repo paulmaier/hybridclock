@@ -1,0 +1,25 @@
+citHeader("If you use hybridclock, please cite both the report in which the approach",
+          "was first developed and the software paper describing the package.")
+
+bibentry(
+  bibtype = "TechReport",
+  title = "Hybridization between Anaxyrus boreas x canorus within Eldorado National Forest: the first genomic assessment",
+  author = c(person("Paul A.", "Maier"), person("Jeffrey A.", "Mabe"), person("Jennifer L.", "Hale"),
+             person("Andrea E.", "Herman"), person("Bryce P.", "Kantz")),
+  institution = "US Forest Service",
+  type = "Final report",
+  year = "2024",
+  textVersion = paste("Maier PA, Mabe JA, Hale JL, Herman AE, Kantz BP (2024) Hybridization between",
+                      "Anaxyrus boreas x canorus within Eldorado National Forest: the first genomic",
+                      "assessment. Final report to the US Forest Service.")
+)
+
+bibentry(
+  bibtype = "Unpublished",
+  title = "hybridclock: Dating hybrid populations beyond F2, with or without a genetic map",
+  author = person("Paul A.", "Maier"),
+  year = "2026",
+  note = "Molecular Ecology Resources, in review. The volume, pages and DOI will be added here on publication.",
+  textVersion = paste("Maier PA (2026) hybridclock: Dating hybrid populations beyond F2, with or",
+                      "without a genetic map. Molecular Ecology Resources, in review.")
+)

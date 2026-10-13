@@ -1,0 +1,41 @@
+Package: hybridclock
+Title: How Long Have Hybrids Been Forming? Hybrid Population Histories from Diagnostic Markers
+Version: 0.1.0
+Authors@R: 
+    person("Paul A.", "Maier", , "maierpa@gmail.com", role = c("aut", "cre", "cph"),
+           comment = c(ORCID = "0000-0003-0851-8827"))
+Description: Estimates the history of hybrid populations from diagnostic
+    markers, with or without a genetic map: the average age of the hybrids,
+    how long ago the rarer species' ancestry entered, the number of
+    backcrosses, and whether pure animals of the rarer species are still
+    arriving. Population samples of
+    hybrid index and interspecies heterozygosity (Fitzpatrick 2012
+    <doi:10.1186/1471-2148-12-131>) are compared with forward simulations
+    that include drift, small breeding groups, sibling mating and separate
+    breeding pools, so that inbreeding is not mistaken for age. Estimates
+    come from Cubist models with split-conformal intervals. Recent hybrids
+    are also classified individually, and the number of markers needed to
+    detect backcrossed hybrids follows Boecklen and Howard (1997)
+    <doi:10.1890/0012-9658(1997)078[2611:GAOHZN]2.0.CO;2>.
+License: MIT + file LICENSE
+URL: https://github.com/paulmaier/hybridclock, https://paulmaier.github.io/hybridclock/
+BugReports: https://github.com/paulmaier/hybridclock/issues
+Depends: 
+    R (>= 4.1)
+Imports:
+    Cubist,
+    graphics,
+    grDevices,
+    parallel,
+    ranger,
+    stats
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+Config/roxygen2/version: 8.1.0
+LazyData: true

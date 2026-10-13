@@ -1,0 +1,13 @@
+.Rproj.user
+.Rhistory
+.RData
+.DS_Store
+docs/
+*.tar.gz
+hybridclock.Rcheck/
+Rplots.pdf
+vignettes/*.html
+data-raw/validation/output/
+vignettes/articles/*_cache/
+vignettes/articles/*_files/
+vignettes/articles/*.html

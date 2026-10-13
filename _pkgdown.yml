@@ -1,0 +1,50 @@
+url: https://paulmaier.github.io/hybridclock/
+template:
+  bootstrap: 5
+reference:
+- title: Markers and scores
+  contents:
+  - diagnostic_markers
+  - shared_loci
+  - orient_genotypes
+  - marker_information
+  - check_markers
+  - microsat_markers
+  - hybrid_scores_microsat
+  - classify_hybrids_microsat
+  - hybrid_scores
+  - plot_triangle
+- title: Individuals
+  contents:
+  - classify_hybrids
+  - effective_markers
+- title: Population histories
+  contents:
+  - simulate_hybrid_zone
+  - random_map
+  - sample_summaries
+  - build_reference
+  - class_settings
+  - train_clock
+  - estimate_history
+  - predict.hybridclock_model
+- title: Study design
+  contents:
+  - marker_power
+  - markers_needed
+  - classification_power
+- title: Data
+  contents:
+  - hybridclock_example
+  - wolves
+  - chickens
+  - bettongs
+  - possums
+  - carp
+
+articles:
+- title: Get started
+  navbar: ~
+  contents:
+  - hybridclock
+  - articles/tutorial

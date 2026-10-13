@@ -1,0 +1,16 @@
+The package code is licensed under the MIT license (see LICENSE).
+
+The example datasets in data/ are derived from published data:
+
+- wolves: Fitak RR, Rinkevich SE, Culver M (2018), Dryad, doi:10.5061/dryad.g68k008 (CC0).
+- chickens: Johnsson M et al., figshare, doi:10.6084/m9.figshare.1265060 (CC0).
+- possums: Weeks AR et al. (2017), Dryad, doi:10.5061/dryad.7g988 (CC0).
+- carp: Lamer JT et al., Dryad, doi:10.5061/dryad.kp6j2 and doi:10.5061/dryad.5j2v6 (CC0).
+- bettongs: Rick K (2019), Mendeley Data, doi:10.17632/vg983472v3.1, licensed under
+  the Creative Commons Attribution 4.0 International license
+  (https://creativecommons.org/licenses/by/4.0/). Changes: a subset of SNPs and
+  animals was selected and genotypes were recoded as counts of one source's alleles;
+  group labels follow Table S6 of Rick et al. (2019) Genes 10:851,
+  doi:10.3390/genes10110851 (CC BY 4.0).
+
+See ?wolves, ?chickens, ?possums, ?carp and ?bettongs for full citations.
