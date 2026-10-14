@@ -11,7 +11,7 @@
 #
 # Run from the package directory: Rscript data-raw/wolves.R
 
-truth_dir <- path.expand(Sys.getenv("HYBRIDCLOCK_TRUTH_DATA", "~/scripts/hybridclock_analysis/truth_data"))
+truth_dir <- path.expand(Sys.getenv("HYBRIDCLOCK_TRUTH_DATA", "~/scripts/hybridclock_MEE/truth_data"))
 source(file.path(truth_dir, "wolf_mexican_fitak2018", "load.R"))
 w <- load_wolf_mexican_fitak2018(file.path(truth_dir, "wolf_mexican_fitak2018"))
 

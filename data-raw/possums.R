@@ -10,7 +10,7 @@
 #
 # Run from the package directory: Rscript data-raw/possums.R
 
-truth_dir <- path.expand(Sys.getenv("HYBRIDCLOCK_TRUTH_DATA", "~/scripts/hybridclock_analysis/truth_data"))
+truth_dir <- path.expand(Sys.getenv("HYBRIDCLOCK_TRUTH_DATA", "~/scripts/hybridclock_MEE/truth_data"))
 source(file.path(truth_dir, "possum_weeks2017", "load.R"))
 p <- load_possum_weeks2017(truth_dir)
 

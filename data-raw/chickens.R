@@ -12,7 +12,7 @@
 #
 # Run from the package directory: Rscript data-raw/chickens.R
 
-truth_dir <- path.expand(Sys.getenv("HYBRIDCLOCK_TRUTH_DATA", "~/scripts/hybridclock_analysis/truth_data"))
+truth_dir <- path.expand(Sys.getenv("HYBRIDCLOCK_TRUTH_DATA", "~/scripts/hybridclock_MEE/truth_data"))
 source(file.path(truth_dir, "chicken_rjfwl_ail", "load.R"))
 ch <- load_chicken_rjfwl_ail(file.path(truth_dir, "chicken_rjfwl_ail"), drop_random = TRUE)
 

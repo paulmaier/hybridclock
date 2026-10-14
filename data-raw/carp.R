@@ -13,7 +13,7 @@
 #
 # Run from the package directory: Rscript data-raw/carp.R
 
-truth_dir <- path.expand(Sys.getenv("HYBRIDCLOCK_TRUTH_DATA", "~/scripts/hybridclock_analysis/truth_data"))
+truth_dir <- path.expand(Sys.getenv("HYBRIDCLOCK_TRUTH_DATA", "~/scripts/hybridclock_MEE/truth_data"))
 source(file.path(truth_dir, "carp_lamer2015", "load.R"))
 cp <- load_carp_lamer2015(truth_dir, include_selected = FALSE)
 
