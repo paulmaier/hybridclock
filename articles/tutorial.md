@@ -10,11 +10,11 @@ the hybrids is known or bounded, so you can see how close the estimates
 come.
 
 The settings follow the rules used to validate the package on 23 truth
-sets (Maier, in preparation): describe what is known about the
-population, and keep the ranges generous. To keep the run time down,
-each reference here has 2,000 simulated histories. For real analyses use
-6,000 or more. The whole tutorial takes about 15 minutes on four cores;
-most of that is building the references.
+sets (Maier, in review): describe what is known about the population,
+and keep the ranges generous. To keep the run time down, each reference
+here has 2,000 simulated histories. For real analyses use 6,000 or more.
+The whole tutorial takes about 15 minutes on four cores; most of that is
+building the references.
 
 ``` r
 
@@ -360,7 +360,8 @@ If you use hybridclock, please cite both:
   between *Anaxyrus boreas* × *canorus* within Eldorado National Forest:
   the first genomic assessment. Final report to the US Forest Service.
 - Maier PA (2026) hybridclock: Dating hybrid populations beyond F2, with
-  or without a genetic map. Manuscript in preparation.
+  or without a genetic map. *Methods in Ecology and Evolution*, in
+  review.
 
 Run `citation("hybridclock")` for the entries.
 

@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/paulmaier/hybridclock/blob/v0.1.1/inst/CITATION)
+[`inst/CITATION`](https://github.com/paulmaier/hybridclock/blob/main/inst/CITATION)
 
 Maier PA, Mabe JA, Hale JL, Herman AE, Kantz BP (2024) Hybridization
 between Anaxyrus boreas x canorus within Eldorado National Forest: the
@@ -23,11 +23,11 @@ first genomic assessment. Final report to the US Forest Service.
     }
 
 Maier PA (2026) hybridclock: Dating hybrid populations beyond F2, with
-or without a genetic map. Manuscript in preparation.
+or without a genetic map. Methods in Ecology and Evolution, in review.
 
     @Unpublished{,
       title = {hybridclock: Dating hybrid populations beyond F2, with or without a genetic map},
       author = {Paul A. Maier},
       year = {2026},
-      note = {Manuscript in preparation. The journal, volume, pages and DOI will be added here on publication.},
+      note = {Methods in Ecology and Evolution, in review. The volume, pages and DOI will be added here on publication.},
     }

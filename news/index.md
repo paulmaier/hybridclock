@@ -1,5 +1,10 @@
 # Changelog
 
+## hybridclock (development version)
+
+- The software paper is cited as in review at *Methods in Ecology and
+  Evolution* (README, tutorial and `citation("hybridclock")`).
+
 ## hybridclock 0.1.1
 
 - `classify_hybrids(error = "estimate")` warns when the estimated
