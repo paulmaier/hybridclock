@@ -57,3 +57,14 @@ test_that("class settings reproduce the default classifier and handle markers th
   expect_lt(mean(k_fixed == "F1"), 0.5)
   expect_output(print(cs_freq), "not fixed")
 })
+
+test_that("an error estimate at the top of its range warns", {
+  set.seed(3)
+  ex <- hybridclock_example()
+  mk <- diagnostic_markers(ex$genotypes, ex$groups, "species1", "species2", locus = ex$locus)
+  g <- orient_genotypes(ex$genotypes, mk)
+  g[] <- sample(0:2, length(g), TRUE)
+  m <- data.frame(column = seq_len(ncol(g)), name = colnames(g), flip = FALSE, freq1 = 0, freq2 = 1)
+  sc <- hybrid_scores(g, m)
+  expect_warning(classify_hybrids(sc, error = "estimate", genotypes = g, markers = m), "top of its range")
+})

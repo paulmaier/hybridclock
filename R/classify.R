@@ -32,6 +32,9 @@
 #' @param scores Output of [hybrid_scores()] (`S`, `H`, `n_markers`).
 #' @param alpha Significance level of the fit test.
 #' @param error Genotyping error rate, or `"estimate"` (with `genotypes`).
+#'   An estimate that reaches the top of its range (0.1) gives a warning: with
+#'   many linked markers, extra variation in heterozygosity can be taken for
+#'   genotyping error, and a fixed rate is then safer.
 #' @param genotypes Optional genotypes at the diagnostic markers, counting
 #'   species-2 alleles, as from [orient_genotypes()], one row per row of
 #'   `scores`.
@@ -97,6 +100,10 @@ classify_hybrids <- function(scores, alpha = 0.01, error = 0.005, genotypes = NU
   if (identical(error, "estimate")) {
     grid_e <- c(0.0005, 0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1)
     error <- grid_e[which.max(vapply(grid_e, function(e) sum(free_ll(e)), 0))]
+    if (error == max(grid_e))
+      warning("The estimated genotyping error rate reached the top of its range (", max(grid_e), "). ",
+              "With many linked markers, such as in F2 families, extra variation in heterozygosity can be ",
+              "taken for genotyping error; consider a fixed rate (the default, 0.005).", call. = FALSE)
   }
   ll <- loglik(ca, cb, error)
   colnames(ll) <- names(hybrid_classes)

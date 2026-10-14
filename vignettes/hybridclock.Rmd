@@ -12,7 +12,12 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6, fig.height
 ```
 
 This vignette walks through a small example: two pure reference groups and
-two hybrid sites, simulated so that the true histories are known.
+two hybrid sites, simulated so that the true histories are known. The
+[full tutorial](https://paulmaier.github.io/hybridclock/articles/tutorial.html)
+runs the package on five real datasets, one for each common situation: a
+captive cross with a known pedigree, an advanced intercross with a genetic
+map, a closed population founded once, a genetic rescue typed at
+microsatellites, and an invasive hybrid zone.
 
 ```{r}
 library(hybridclock)

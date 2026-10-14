@@ -19,7 +19,10 @@ classify_hybrids(
 
 \item{alpha}{Significance level of the fit test.}
 
-\item{error}{Genotyping error rate, or \code{"estimate"} (with \code{genotypes}).}
+\item{error}{Genotyping error rate, or \code{"estimate"} (with \code{genotypes}).
+An estimate that reaches the top of its range (0.1) gives a warning: with
+many linked markers, extra variation in heterozygosity can be taken for
+genotyping error, and a fixed rate is then safer.}
 
 \item{genotypes}{Optional genotypes at the diagnostic markers, counting
 species-2 alleles, as from \code{\link[=orient_genotypes]{orient_genotypes()}}, one row per row of
