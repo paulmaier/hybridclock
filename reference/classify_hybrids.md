@@ -37,7 +37,10 @@ classify_hybrids(
 
 - error:
 
-  Genotyping error rate, or `"estimate"` (with `genotypes`).
+  Genotyping error rate, or `"estimate"` (with `genotypes`). An estimate
+  that reaches the top of its range (0.1) gives a warning: with many
+  linked markers, extra variation in heterozygosity can be taken for
+  genotyping error, and a fixed rate is then safer.
 
 - genotypes:
 

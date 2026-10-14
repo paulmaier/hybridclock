@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">hybridclock</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,9 +34,16 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/paulmaier/hybridclock/blob/v0.1.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/paulmaier/hybridclock/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.1" id="hybridclock-011">hybridclock 0.1.1<a class="anchor" aria-label="anchor" href="#hybridclock-011"></a></h2>
+<ul><li>
+<code>classify_hybrids(error = "estimate")</code> warns when the estimated genotyping error rate reaches the top of its range (0.1). With many linked markers, as in F2 families, extra variation in heterozygosity can be taken for genotyping error; a fixed rate (the default, 0.005) is then safer.</li>
+<li>The getting-started vignette links to the full tutorial.</li>
+<li>The package description quotes ‘Cubist’ and cites Fitzpatrick (2012) in the form CRAN asks for.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="hybridclock-010">hybridclock 0.1.0<a class="anchor" aria-label="anchor" href="#hybridclock-010"></a></h2>
 <ul><li><p>First release: diagnostic markers and hybrid scores, individual classification of recent hybrids, forward simulation of hybrid populations, and estimates of hybrid age (both species and rare species), backcrosses and arrival rate with split-conformal intervals.</p></li>
@@ -67,7 +74,8 @@
 <li><p><code><a href="../reference/build_reference.html">build_reference()</a></code> draws heterozygote dropout in every run when the given range excludes zero.</p></li>
 <li><p>Example datasets: <code>wolves</code>, <code>chickens</code>, <code>bettongs</code>, <code>possums</code>, <code>carp</code>.</p></li>
 </ul></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

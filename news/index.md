@@ -1,5 +1,16 @@
 # Changelog
 
+## hybridclock 0.1.1
+
+- `classify_hybrids(error = "estimate")` warns when the estimated
+  genotyping error rate reaches the top of its range (0.1). With many
+  linked markers, as in F2 families, extra variation in heterozygosity
+  can be taken for genotyping error; a fixed rate (the default, 0.005)
+  is then safer.
+- The getting-started vignette links to the full tutorial.
+- The package description quotes ‘Cubist’ and cites Fitzpatrick (2012)
+  in the form CRAN asks for.
+
 ## hybridclock 0.1.0
 
 - First release: diagnostic markers and hybrid scores, individual

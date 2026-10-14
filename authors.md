@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/paulmaier/hybridclock/blob/v0.1.0/inst/CITATION)
+[`inst/CITATION`](https://github.com/paulmaier/hybridclock/blob/main/inst/CITATION)
 
 Maier PA, Mabe JA, Hale JL, Herman AE, Kantz BP (2024) Hybridization
 between Anaxyrus boreas x canorus within Eldorado National Forest: the
