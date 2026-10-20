@@ -1,0 +1,461 @@
+---
+title: "What else looks like age? Linkage, inbreeding, drift, dropout, gene flow and selection"
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 8, fig.height = 4.2,
+                      dpi = 110, out.width = "100%", echo = FALSE)
+library(hybridclock)
+red <- "#E8202A"; blue <- "#2B55D5"; purple <- "#9B2FC9"; grey <- "#BDBDBD"
+gold <- "#E6A817"; dark <- "#4D4D4D"
+
+# one individual as a large circle holding two allele dots
+genotype_circle <- function(x, y, a1, a2, r = 0.38, faded = c(FALSE, FALSE)) {
+  symbols(x, y, circles = r, inches = FALSE, add = TRUE, fg = "grey55", lwd = 1.3)
+  for (k in 1:2) {
+    col <- c(a1, a2)[k]; dx <- c(-0.15, 0.15)[k]
+    if (faded[k]) symbols(x + dx, y, circles = 0.11, inches = FALSE, add = TRUE, fg = col, lwd = 1.5, lty = 2)
+    else symbols(x + dx, y, circles = 0.11, inches = FALSE, add = TRUE, bg = col, fg = col)
+  }
+}
+
+# a row of individuals; g = genotypes coded 0/1/2 (copies of the species-2 allele)
+genotype_row <- function(g, y, label, cols = c(red, blue)) {
+  text(-0.2, y, label, adj = 1, cex = 0.9)
+  for (i in seq_along(g)) {
+    a <- if (g[i] == 0) cols[c(1, 1)] else if (g[i] == 2) cols[c(2, 2)] else cols
+    genotype_circle(i, y, a[1], a[2])
+  }
+}
+
+blank <- function(xlim, ylim) {
+  par(mar = c(0.5, 0.5, 0.5, 0.5))
+  plot(NA, xlim = xlim, ylim = ylim, axes = FALSE, xlab = "", ylab = "", asp = 1)
+}
+
+# the hybrid triangle with points colored by group
+triangle <- function(S, H, group, cols, main = "", legend_pos = "topright", cex = 1) {
+  par(mar = c(4, 4, 2, 1))
+  plot(NA, xlim = c(0, 1), ylim = c(0, 1), xlab = "Hybrid index (S)",
+       ylab = "Interspecies heterozygosity (H)", main = main, las = 1, cex.main = 1)
+  lines(c(0, 0.5, 1), c(0, 1, 0), col = "grey70")
+  s <- seq(0, 1, 0.01); lines(s, 2 * s * (1 - s), col = "grey70", lty = 2)
+  for (g in names(cols)) points(S[group == g], H[group == g], pch = 16, col = adjustcolor(cols[[g]], 0.6), cex = cex)
+  legend(legend_pos, names(cols), col = unlist(cols), pch = 16, bty = "n", cex = 0.85)
+}
+
+# painted chromosomes: one row per individual, genotypes along a map
+paint <- function(G, map, rows, main = "", marks = NULL, y0 = 0) {
+  chroms <- sort(unique(map$chromosome))
+  len <- tapply(map$position, map$chromosome, max)
+  gap <- 0.06 * sum(len); xs <- c(0, cumsum(len + gap))[seq_along(chroms)]
+  for (k in seq_along(rows)) {
+    y <- y0 - k
+    for (j in seq_along(chroms)) {
+      m <- which(map$chromosome == chroms[j]); p <- map$position[m]
+      edges <- c(0, (p[-1] + p[-length(p)]) / 2, len[j])
+      col <- c(red, purple, blue)[G[rows[k], m] + 1]
+      rect(xs[j] + edges[-length(edges)], y - 0.32, xs[j] + edges[-1], y + 0.32, col = col, border = NA)
+      rect(xs[j], y - 0.32, xs[j] + len[j], y + 0.32, border = "grey40")
+    }
+  }
+  if (!is.null(marks)) for (j in seq_along(chroms)) {
+    mm <- marks[marks$chromosome == chroms[j], ]
+    points(xs[j] + mm$position, rep(y0 - 0.25, nrow(mm)), pch = 8, cex = 0.7, col = dark)
+  }
+  text(xs + len / 2, y0 - length(rows) - 0.9, paste("chromosome", chroms), cex = 0.8, col = "grey30")
+  if (nzchar(main)) text(sum(len + gap) / 2, y0 + 0.55, main, cex = 0.95, font = 2)
+}
+```
+
+hybridclock reads the age of a hybrid population from the hybrid index
+(*S*, the share of alleles from species 2) and interspecies heterozygosity
+(*H*, the share of markers with one allele from each species) of its
+individuals, and from how those vary across individuals and markers. Several
+other processes change the same patterns without any change in age. This
+article shows what each one does, why it can be mistaken for age, and how
+hybridclock keeps it apart. The figures are drawn from the package's own
+simulator, except for selection, which is illustrated.
+
+## The starting point: why later generations look alike
+
+Each large circle below is one individual at one diagnostic marker, and the
+two dots inside are its two alleles: red from species 1, blue from species 2.
+F1s carry one allele from each species. In F2s, a quarter are red-red, half
+red-blue and a quarter blue-blue. The F3 generation, and every later
+generation of a randomly mating swarm, has the same expected mix, so a
+single marker in a single individual cannot tell an F2 from an F8.
+
+```{r generations, fig.height = 3.3}
+set.seed(4)
+blank(c(-1.6, 10.5), c(0.4, 5.6))
+genotype_row(rep(0, 10), 5, "species 1")
+genotype_row(rep(2, 10), 4, "species 2")
+genotype_row(rep(1, 10), 3, "F1")
+genotype_row(c(0, 1, 1, 2, 1, 0, 1, 2, 1, 1), 2, "F2")
+genotype_row(c(1, 2, 0, 1, 1, 1, 0, 2, 1, 0), 1, "F3 and later")
+```
+
+Across many markers, an individual's *S* and *H* are averages of these
+one-marker pictures. What changes with age is subtler: how genotypes are
+arranged along chromosomes, how unevenly ancestry is spread across markers,
+and how often individuals look like recent crosses. The processes below
+change those same patterns.
+
+## Linkage
+
+Markers on the same chromosome are inherited together until recombination
+separates them. In the first hybrid generations the blocks of each species'
+ancestry are long; every generation of recombination cuts them shorter.
+Below, five individuals from the second hybrid generation (top) and the eighth
+(bottom) of the same closed population are painted along three chromosomes:
+red where both copies come from species 1, blue where both come from species
+2, and purple where the individual is heterozygous. Asterisks mark a typical
+panel of 30 markers.
+
+```{r linkage-paint, fig.height = 5.2}
+set.seed(11)
+map <- random_map(1200, chromosomes = 3, length_cM = 300)
+sim <- simulate_hybrid_zone(generations = 8, breeders = 80, founders = "F1", n_markers = 1200,
+                            map = map, sample_at = c(1, 8), seed = 11)
+smp <- attr(sim, "samples")
+panel <- map[sort(sample.int(nrow(map), 30)), ]
+par(mar = c(0.5, 0.5, 0.5, 0.5))
+plot(NA, xlim = c(-5, 330), ylim = c(-15.5, 1), axes = FALSE, xlab = "", ylab = "")
+paint(smp[["1"]]$genotypes, map, rows = 1:5, main = "Second hybrid generation (F2)", marks = panel, y0 = 0)
+paint(smp[["8"]]$genotypes, map, rows = 1:5, main = "Eighth hybrid generation", marks = panel, y0 = -7.5)
+legend("bottom", c("species 1 / species 1", "heterozygous", "species 2 / species 2", "marker"),
+       fill = c(red, purple, blue, NA), border = NA, pch = c(NA, NA, NA, 8), col = c(NA, NA, NA, dark),
+       bty = "n", cex = 0.8, horiz = TRUE)
+```
+
+Within one individual, markers that sit in the same long block all report
+the same ancestry, so they repeat one piece of information rather than adding
+new ones. An individual's *S* and *H* are averages over its markers, and with
+long blocks those averages rest on only a few independent pieces. Averages of
+a few pieces vary more than averages of many, so F2s typed at linked markers
+differ from one another much more than F2s typed at unlinked markers: one may
+happen to carry mostly species-2 blocks, another mostly species-1 blocks. The
+triangle shows F2 families typed at 30 markers, either unlinked or on three
+short chromosomes.
+
+```{r linkage-triangle, fig.height = 4.6, fig.width = 6.5, out.width = "75%", fig.align = "center"}
+f2 <- function(map, seed) {
+  s <- simulate_hybrid_zone(generations = 1, breeders = 30, founders = "F1", n_markers = 30,
+                            sample_size = 60, map = map, sample_at = 1, seed = seed)
+  attr(s, "samples")[["1"]]
+}
+a <- f2(NULL, 1); b <- f2(random_map(30, 3, 150), 1)
+triangle(c(a$S, b$S), c(a$H, b$H), rep(c("F2, unlinked markers", "F2, linked markers"), each = 60),
+         list("F2, unlinked markers" = red, "F2, linked markers" = purple))
+```
+
+A spread like this is not what a single F2 family looks like when markers
+are assumed to be independent. It looks like a mix of hybrid classes: some
+individuals near the F1 corner, others near the backcrosses or below the
+dashed curve, where later generations fall. Classified one at a time on the
+assumption that markers are independent, only about 40% of these F2s are
+called F2, and a fifth are called later-generation hybrids:
+
+```{r linkage-classes, fig.height = 3.6, fig.width = 7, out.width = "85%", fig.align = "center"}
+calls <- function(map_fun, eff) unlist(lapply(1:20, function(i) {
+  x <- f2(map_fun(), i)
+  as.character(classify_hybrids(data.frame(S = x$S, H = x$H, n_markers = 30), effective_markers = eff)$class)
+}))
+grp <- function(v) {
+  v <- ifelse(v == "F2", "F2", ifelse(v == "later", "later", ifelse(grepl("^BC", v), "backcross", "other")))
+  100 * prop.table(table(factor(v, levels = c("F2", "backcross", "later", "other"))))
+}
+tab <- cbind("unlinked\nmarkers" = grp(calls(function() NULL, NULL)),
+             "linked\nmarkers" = grp(calls(function() random_map(30, 3, 150), NULL)),
+             "linked, with\neffective_markers" = grp(calls(function() random_map(30, 3, 150), effective_markers(3, 150))))
+par(mar = c(4, 4.5, 1, 9), xpd = TRUE)
+barplot(tab, col = c(purple, gold, blue, grey), border = NA, las = 1, ylab = "Percent of true F2s",
+        cex.names = 0.85)
+legend("right", inset = c(-0.32, 0), rev(rownames(tab)), fill = rev(c(purple, gold, blue, grey)),
+       border = NA, bty = "n", cex = 0.85, title = "Called")
+```
+
+So an F2 family typed at linked markers can be read as a more mixed, more
+advanced population than it is.
+
+**How hybridclock handles it.** The simulated reference includes linkage:
+either the real genetic map (`map`, with `map_scale` for uncertainty in its
+length) or a range of chromosome numbers and map lengths, so clustered
+markers in the data are compared with simulations that cluster the same way.
+For individual classes, `effective_markers()` tells the classifier how many
+independent markers a linked panel is worth, which removes the false
+"later" calls (right-hand bar above); with so few independent markers, the
+remaining classes stay uncertain, which is why the population clock relies on
+simulations that include linkage. With a map, the clock also counts how often
+an individual's genotype switches between neighboring markers. Those switches mark the boundaries between
+ancestry blocks, and they become more common with every generation:
+
+```{r switches, fig.height = 3.6, fig.width = 6.5, out.width = "75%", fig.align = "center"}
+sw <- simulate_hybrid_zone(generations = 20, breeders = 200, founders = "F1", n_markers = 1200,
+                           map = map, junctions = TRUE, seed = 3)
+par(mar = c(4, 5.5, 1, 1))
+plot(sw$generation, sw$switch_rate, type = "b", pch = 16, col = purple, las = 1,
+     xlab = "Hybrid generation", ylab = "Ancestry switches\nper marker interval")
+```
+
+## Inbreeding
+
+Inbreeding (mating between relatives, for example in small breeding groups)
+removes heterozygotes. Below, the top two rows show a diagnostic marker in a
+young, inbred population and in an older population that mates at random:
+both have fewer heterozygotes than an F2. The bottom two rows show a marker
+that is polymorphic within both species (gold and grey alleles, with nothing
+to do with hybrid ancestry). There the two populations differ: only the
+inbred one is missing heterozygotes.
+
+```{r inbreeding-beads, fig.height = 3.4}
+blank(c(-3.2, 10.5), c(0.4, 4.8))
+text(-3.2, 4.6, "diagnostic marker", adj = 0, cex = 0.85, font = 3)
+genotype_row(c(0, 0, 1, 2, 2, 0, 1, 2, 2, 0), 4, "young, inbred")
+genotype_row(c(0, 1, 0, 2, 2, 1, 0, 2, 1, 0), 3, "older, random mating")
+text(-3.2, 2.6, "marker variable within species", adj = 0, cex = 0.85, font = 3)
+genotype_row(c(0, 0, 2, 2, 0, 2, 0, 0, 2, 1), 2, "young, inbred", cols = c(gold, grey))
+genotype_row(c(1, 0, 1, 2, 1, 1, 0, 1, 2, 1), 1, "older, random mating", cols = c(gold, grey))
+```
+
+Lower heterozygosity at diagnostic markers is a sign of age, so inbreeding
+alone can make a young population look old. The simulations below compare
+populations at the fifth hybrid generation, bred in three small groups with
+frequent sibling mating, against populations of 60 breeders that have mated
+at random for thirty generations. At the diagnostic markers they look alike:
+both have about 20% fewer heterozygotes than random mating at their ancestry
+would give (left). Only the inbred populations are also missing heterozygotes
+at markers that vary within species (right, the inbreeding coefficient at
+those markers).
+
+```{r inbreeding-sims, fig.height = 3.8}
+set.seed(1)
+shared <- runif(150, 0.2, 0.8)
+run <- function(g, n, sib, pools, seed) simulate_hybrid_zone(generations = g, breeders = n,
+  sib_mating = sib, pools = pools, pool_crossing = 0.02, founders = "F1", n_markers = 300,
+  shared_freq = shared, sample_size = 30, seed = seed)[g, c("het_floor_ratio", "shared_fis")]
+inb <- do.call(rbind, lapply(1:25, function(i) run(5, 30, 0.8, 3, i)))
+old <- do.call(rbind, lapply(1:25, function(i) run(30, 60, 0, 1, 100 + i)))
+par(mfrow = c(1, 2), mar = c(4, 4.5, 1.5, 1))
+boxplot(list("5th generation,\ninbred" = inb$het_floor_ratio, "30th generation,\nrandom mating" = old$het_floor_ratio),
+        col = c(gold, purple), las = 1, ylab = "Observed / expected H", main = "Diagnostic markers", cex.main = 0.95)
+boxplot(list("5th generation,\ninbred" = inb$shared_fis, "30th generation,\nrandom mating" = old$shared_fis),
+        col = c(gold, purple), las = 1, ylab = "Inbreeding coefficient", main = "Markers variable within species",
+        cex.main = 0.95)
+abline(h = 0, lty = 2, col = "grey50")
+```
+
+**How hybridclock handles it.** Markers that vary within both species
+(`shared_loci()`) give a separate measure of inbreeding and linkage
+disequilibrium, and the simulated reference includes sibling mating and
+separate breeding pools (`sib_mating`, `pools`). The clock learns to read
+age from the diagnostic markers while accounting for inbreeding measured at
+the shared ones.
+
+## Drift
+
+Each generation, a breeding population passes on a random sample of its
+alleles, like drawing beads from a jar. At each marker, the share of
+species-2 ancestry wanders away from the population average, and the
+smaller the population, the faster it wanders. Below, each jar is one marker,
+and its 20 beads show the share of species-2 ancestry (blue) at that marker
+in the population.
+
+```{r drift-jars, fig.height = 3.2}
+jar_row <- function(G, y, label) {
+  text(-0.6, y + 0.9, label, adj = 0, cex = 0.85, font = 3)
+  for (j in seq_len(ncol(G))) {
+    x0 <- (j - 1) * 2.2
+    rect(x0, y - 1.1, x0 + 1.8, y + 0.6, border = "grey45", lwd = 1.3)
+    n2 <- round(20 * mean(G[, j]) / 2)
+    al <- rep(c(0, 1), c(20 - n2, n2))
+    for (k in seq_along(al)) {
+      cx <- x0 + 0.25 + ((k - 1) %% 4) * 0.43; cy <- y - 0.9 + ((k - 1) %/% 4) * 0.3
+      symbols(cx, cy, circles = 0.13, inches = FALSE, add = TRUE, bg = c(red, blue)[al[k] + 1], fg = NA)
+    }
+  }
+}
+pick <- function(n, g, seed) {
+  s <- simulate_hybrid_zone(generations = g, breeders = n, founders = "F1", n_markers = 400,
+                            sample_size = 200, sample_at = g, seed = seed)
+  attr(s, "samples")[[as.character(g)]]$genotypes
+}
+G_large <- pick(500, 15, 2); G_small <- pick(20, 15, 2)
+blank(c(-0.8, 17.5), c(-4.6, 3.6))
+jar_row(G_large[, 1:8], 2, "large population (500 breeders), fifteenth generation")
+jar_row(G_small[, 1:8], -2, "small population (20 breeders), fifteenth generation")
+```
+
+Drift acts on allele frequencies. In a population founded by F1s, every
+diagnostic marker starts with half its alleles from each species. As the
+share at each marker wanders, two things happen at once:
+
+- **at each marker, the alleles become more alike.** As the share moves
+  toward 0 or 1, more and more individuals carry the same species' allele
+  there, so individuals also become more alike;
+- **across markers, the shares become more different.** Some markers end up
+  mostly species 1 and others mostly species 2, so ancestry becomes uneven
+  along the genome.
+
+These are the same process seen two ways. hybridclock measures the second
+as the variance of the species-2 share across markers, divided by its
+largest possible value. It runs from 0, when every marker has the same
+share, to 1, when every marker is fixed for one species or the other (like
+*F*~ST~, with markers in place of populations). On the left below are the
+shares at all 400 markers in the two populations above; on the right is the
+measure over 30 generations at three breeding sizes:
+
+```{r drift-lines, fig.height = 3.8}
+d <- lapply(c(20, 100, 500), function(n) {
+  r <- lapply(1:8, function(i) simulate_hybrid_zone(generations = 30, breeders = n, founders = "F1",
+                                                    n_markers = 200, sample_size = 60, seed = i))
+  Reduce(`+`, lapply(r, `[`, c("generation", "marker_spread"))) / 8
+})
+cols <- c(gold, "#8C8C8C", dark)
+par(mfrow = c(1, 2), mar = c(4, 5, 1.5, 1))
+br <- seq(0, 1, 0.05)
+h_large <- hist(colMeans(G_large) / 2, breaks = br, plot = FALSE)
+h_small <- hist(colMeans(G_small) / 2, breaks = br, plot = FALSE)
+plot(NA, xlim = c(0, 1), ylim = c(0, max(h_large$counts, h_small$counts)), las = 1,
+     xlab = "Share of species-2 alleles at a marker", ylab = "Markers",
+     main = "Fifteenth generation", cex.main = 0.95)
+rect(br[-length(br)], 0, br[-1], h_large$counts, col = adjustcolor(dark, 0.6), border = "white")
+rect(br[-length(br)], 0, br[-1], h_small$counts, col = adjustcolor(gold, 0.7), border = "white")
+legend("topright", c("500 breeders", "20 breeders"), fill = c(adjustcolor(dark, 0.6), adjustcolor(gold, 0.7)),
+       border = NA, bty = "n", cex = 0.8)
+plot(NA, xlim = c(1, 30), ylim = c(0, max(sapply(d, `[[`, "marker_spread"))), las = 1,
+     xlab = "Hybrid generation", ylab = "", main = "Uneven ancestry across markers", cex.main = 0.95)
+title(ylab = "Variance of the share (0 to 1)", line = 3.5)
+for (k in 1:3) lines(d[[k]]$generation, d[[k]]$marker_spread, col = cols[k], lwd = 2)
+legend("topleft", paste(c(20, 100, 500), "breeders"), col = cols, lwd = 2, bty = "n", cex = 0.8)
+```
+
+Ancestry becomes uneven with time, and in a closed population its pace
+depends on the breeding size. A small population reaches in a few
+generations the unevenness that a large one reaches only after many, so
+time and breeding size trade off: a small population can look as old as a
+much older large one.
+
+Separate populations drift independently, so the same marker can end up
+mostly species 1 in one population and mostly species 2 in another, and
+the populations grow apart. hybridclock dates each population on its own and
+does not use that divergence.
+
+Drift is also tied to linkage and inbreeding. In a small population, drift
+creates associations between markers even on different chromosomes (linkage
+disequilibrium), and mating among relatives becomes unavoidable, so drift,
+linkage disequilibrium and inbreeding grow together. Linkage disequilibrium
+from drift pushes the same way as linkage on a chromosome: markers that are
+inherited together make individuals differ more. In the simulations, though,
+the alleles becoming more alike at each marker outweigh it, and individuals
+still become more alike as the population drifts. hybridclock measures
+linkage disequilibrium and inbreeding at markers that vary within species,
+and its simulations combine breeding size, mating among relatives and the
+map, so the clock sees these processes together rather than one at a time.
+
+**How hybridclock handles it.** In a closed population, after the first few
+generations drift is the main clock. The reference draws the breeding size from a range (`breeders`), so
+the estimate allows for any size in that range. Give the widest range that
+is plausible: a range that misses the true size gives precise but wrong
+ages, while a generous one only widens the interval.
+
+## Heterozygote dropout
+
+With low sequencing depth or allele-specific failure, one allele of a
+heterozygote can go undetected, and the individual is called homozygous
+(dashed dot below). Missing heterozygotes look like the loss of
+heterozygosity that comes with age, so individuals slide down the triangle.
+
+```{r dropout-beads, fig.height = 1.6}
+blank(c(-2.6, 10.5), c(0.4, 1.6))
+text(-0.2, 1, "heterozygotes\n(dashed: allele missed)", adj = 1, cex = 0.8)
+for (i in 1:10) genotype_circle(i, 1, red, blue, faded = c(FALSE, i %in% c(3, 7)))
+```
+
+```{r dropout-triangle, fig.height = 4.6, fig.width = 6.5, out.width = "75%", fig.align = "center"}
+obs <- function(dr) attr(simulate_hybrid_zone(generations = 3, breeders = 100, n_markers = 300,
+                                              sample_size = 60, het_dropout = dr, sample_at = 3, seed = 21),
+                         "samples")[["3"]]
+o0 <- obs(0); o1 <- obs(0.25)
+triangle(c(o0$S, o1$S), c(o0$H, o1$H), rep(c("no dropout", "25% of heterozygotes missed"), each = 60),
+         list("no dropout" = purple, "25% of heterozygotes missed" = gold))
+```
+
+**How hybridclock handles it.** The reference simulates dropout over a range
+(`het_dropout`), and the classifier behind the class shares is told the
+dropout rate through `class_settings(het_dropout = ...)`, so the simulated and
+the real samples are read the same way. The bettongs in the
+[full tutorial](tutorial.html) are an example.
+
+## Continuing gene flow
+
+When pure individuals of one species keep arriving, they mate with hybrids
+and start new, short pedigree lines. Hybrid age then stops growing and
+levels off, however long the species have been in contact:
+
+```{r gene-flow, fig.height = 3.8, fig.width = 6.5, out.width = "75%", fig.align = "center"}
+gf <- lapply(c(0, 0.02, 0.05), function(r)
+  simulate_hybrid_zone(generations = 30, breeders = 200, start_mix = 0.5, arrivals = c(r, 0),
+                       n_markers = 300, sample_size = 40, seed = 8))
+par(mar = c(4, 5.5, 1, 1))
+plot(NA, xlim = c(1, 30), ylim = c(0, max(sapply(gf, `[[`, "hybrid_age_both"), na.rm = TRUE)),
+     las = 1, xlab = "Generations since contact", ylab = "Hybrid age")
+for (k in 1:3) lines(gf[[k]]$generation, gf[[k]]$hybrid_age_both, col = cols[k], lwd = 2)
+legend("topleft", c("closed", "2% new arrivals per generation", "5% new arrivals per generation"),
+       col = cols, lwd = 2, bty = "n", cex = 0.85)
+```
+
+This is not an error: hybrid age measures the pedigrees of the hybrids, not
+the time since contact. But it means that a young-looking population may
+have been in contact for a long time.
+
+**How hybridclock handles it.** The reference includes arrivals of either
+species, at constant rates or rates that stop or start partway, and the
+package also reports the hybrid age of the rarer species' lines and the
+probability that pure individuals are still arriving. With continuing gene
+flow, hybrid age is a lower bound on the time since contact.
+
+## Selection
+
+Selection against one species' ancestry in parts of the genome removes that
+ancestry from those regions faster than drift would. The painting below
+illustrates this (it is a drawing, not a simulation): the same individuals as
+in the linkage section, with species-2 ancestry purged from most of
+chromosome 2.
+
+```{r selection-paint, fig.height = 4.6}
+G8 <- smp[["8"]]$genotypes[1:5, seq_len(nrow(map))]
+Gsel <- G8
+on2 <- which(map$chromosome == 2 & map$position > 15 & map$position < 85)
+Gsel[, on2] <- pmax(0L, Gsel[, on2] - 1L)
+par(mar = c(0.5, 0.5, 0.5, 0.5))
+plot(NA, xlim = c(-5, 330), ylim = c(-14, 1), axes = FALSE, xlab = "", ylab = "")
+paint(G8, map, rows = 1:5, main = "Eighth generation, no selection", y0 = 0)
+paint(Gsel, map, rows = 1:5, main = "Illustration: species-2 ancestry selected against on chromosome 2", y0 = -7.5)
+```
+
+Regions under selection carry less heterozygosity and more uneven ancestry
+than the rest of the genome, which is what drift and age produce too. In
+experimental sunflower hybrids under strong selection, estimates ran ahead of
+the true number of generations for several generations.
+
+**How hybridclock handles it.** It doesn't: the simulations assume neutral
+markers. Leaving out the most differentiated markers did not help in the
+sunflowers, because the selected blocks covered several whole chromosomes.
+Where strong selection is suspected, estimates may be too old.
+
+## Summary
+
+| Process | How it can look like age | What hybridclock does |
+|---|---|---|
+| Linkage | linked markers make an F2 family look like a mix of hybrid classes | simulates the map, or a range of maps; `effective_markers()` for classes; counts ancestry switches with a real map |
+| Inbreeding | fewer heterozygotes at diagnostic markers | measures inbreeding at shared loci; simulates sibling mating and breeding pools |
+| Drift | uneven ancestry across markers builds up faster in small populations | draws the breeding size from a range |
+| Heterozygote dropout | missed heterozygotes lower *H* | simulates dropout; the classifier is told the rate |
+| Continuing gene flow | hybrid age levels off | simulates arrivals; reports the rarer species' age and the probability of arrivals |
+| Selection | purged regions look like drift | not modeled: a stated limitation |
+
+The settings for each are described in the
+[getting-started vignette](../articles/hybridclock.html), and the
+[full tutorial](tutorial.html) applies them to five real datasets.
