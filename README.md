@@ -2,6 +2,7 @@
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/paulmaier/hybridclock/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/paulmaier/hybridclock/actions/workflows/R-CMD-check.yaml)
+[![CRAN status](https://www.r-pkg.org/badges/version/hybridclock)](https://CRAN.R-project.org/package=hybridclock)
 <!-- badges: end -->
 
 **How long have hybrids been forming? Dating hybrid populations beyond F2,
@@ -40,7 +41,13 @@ lines, with or without continuing gene flow.
 
 ## Installation
 
-Install the development version from GitHub:
+Install the released version from CRAN:
+
+```r
+install.packages("hybridclock")
+```
+
+or the development version from GitHub:
 
 ```r
 # install.packages("pak")
