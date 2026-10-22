@@ -7,6 +7,8 @@
 
 ## hybridclock 0.1.1
 
+CRAN release: 2026-10-22
+
 - `classify_hybrids(error = "estimate")` warns when the estimated
   genotyping error rate reaches the top of its range (0.1). With many
   linked markers, as in F2 families, extra variation in heterozygosity

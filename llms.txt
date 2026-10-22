@@ -41,7 +41,14 @@ families to the 56th generation of an intercross line
 
 ## Installation
 
-Install the development version from GitHub:
+Install the released version from CRAN:
+
+``` r
+
+install.packages("hybridclock")
+```
+
+or the development version from GitHub:
 
 ``` r
 
