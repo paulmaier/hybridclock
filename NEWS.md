@@ -1,5 +1,12 @@
 # hybridclock (development version)
 
+* `build_reference(cores = )` now works on Windows, with a socket cluster;
+  it used to fall back to one core there. Results are the same for any
+  number of cores. `train_clock()` still uses one core on Windows: it takes
+  minutes, and each worker would need its own copy of the reference.
+* References with microsatellites build about 2.5 times faster: each locus's
+  genotype likelihoods are tabulated once, not recomputed for every
+  simulated sample. Scores and references are unchanged.
 * The software paper is cited as in review at *Methods in Ecology and
   Evolution* (README, tutorial and `citation("hybridclock")`).
 

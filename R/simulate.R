@@ -114,7 +114,10 @@ simulate_hybrid_zone <- function(generations = 20, breeders = 100, start_mix = 0
     assort = assort, het_dropout = het_dropout, junctions = junctions, freq = freq, microsat = microsat,
     founder_impurity = founder_impurity, sample_founders = sample_founders,
     class_settings = class_settings)))
-  if (!is.null(microsat)) n_markers <- length(microsat$loci)
+  if (!is.null(microsat)) {
+    n_markers <- length(microsat$loci)
+    if (is.null(microsat$tables)) microsat <- microsat_tables(microsat)
+  }
   arr <- if (is.matrix(arrivals)) arrivals else matrix(arrivals, generations, 2, byrow = TRUE)
   stopifnot(breeders >= 4, nrow(arr) >= generations, ncol(arr) == 2, all(arr >= 0), all(rowSums(arr) <= 1),
             start_mix > 0, start_mix < 1, sample_size >= 2)
@@ -362,6 +365,22 @@ with_seed <- function(seed, expr) {
   on.exit(if (is.null(old)) rm(".Random.seed", envir = globalenv()) else assign(".Random.seed", old, envir = globalenv()))
   set.seed(seed)
   expr
+}
+
+# lapply() in `cores` processes: forked on macOS and Linux, a socket cluster
+# on Windows, where forking is unavailable (or anywhere with
+# options(hybridclock.socket = TRUE)). Every task sets its own seed, so
+# results do not depend on the number of processes.
+run_tasks <- function(X, FUN, cores) {
+  cores <- min(cores, length(X))
+  if (cores <= 1) return(lapply(X, FUN))
+  if (!isTRUE(getOption("hybridclock.socket", .Platform$OS.type == "windows")))
+    return(parallel::mclapply(X, FUN, mc.cores = cores))
+  cl <- parallel::makePSOCKcluster(cores)
+  on.exit(parallel::stopCluster(cl))
+  # workers find packages where this session does
+  parallel::clusterCall(cl, function(p) invisible(.libPaths(p)), .libPaths())
+  parallel::parLapply(cl, X, FUN)
 }
 
 #' Random marker map

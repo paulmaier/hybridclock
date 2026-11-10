@@ -33,12 +33,15 @@ test_that("a clock can be trained and applied", {
 
 test_that("references run in parallel and match serial runs", {
   skip_on_cran()
-  skip_on_os("windows")
   a <- build_reference(n_sims = 4, generations = 3, n_markers = 50, seed = 9)
   b <- build_reference(n_sims = 4, generations = 3, n_markers = 50, seed = 9, cores = 2)
   expect_equal(a, b)
   expect_true(all(a$timing1 %in% c("none", "constant", "stopped", "started")))
   expect_setequal(unique(a$kind), intersect(c("closed", "one", "both"), unique(a$kind)))
+  # socket workers, as on Windows
+  old <- options(hybridclock.socket = TRUE); on.exit(options(old))
+  s <- build_reference(n_sims = 4, generations = 3, n_markers = 50, seed = 9, cores = 2)
+  expect_equal(a, s)
 })
 
 

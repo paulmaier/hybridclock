@@ -101,7 +101,8 @@ dropout, linked markers, and reference allele frequencies for markers
 that are not fixed. They are stored with the reference and used again by
 \code{\link[=estimate_history]{estimate_history()}}, so that the data are classified the same way.}
 
-\item{cores}{Number of processes (forked; 1 on Windows).}
+\item{cores}{Number of processes: forked on macOS and Linux, a socket
+cluster on Windows. Results are the same for any number.}
 
 \item{seed}{Base random seed; run \code{i} uses \code{seed + i}.}
 }

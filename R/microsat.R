@@ -62,25 +62,57 @@ microsat_markers <- function(alleles, groups, ref1, ref2, prior = 0.5) {
 #' @export
 hybrid_scores_microsat <- function(alleles, ms) {
   alleles <- as.matrix(alleles)
-  n <- nrow(alleles); grid <- ml_grid
-  w11 <- 1 - grid$S - grid$H / 2; w12 <- grid$H; w22 <- grid$S - grid$H / 2
+  n <- nrow(alleles); grid <- ml_grid; w <- grid_weights(grid)
   ll <- matrix(0, n, nrow(grid)); n_loci <- numeric(n)
   for (l in ms$loci) {
     x <- match(alleles[, paste0(l, ".a1")], ms$alleles[[l]])
     y <- match(alleles[, paste0(l, ".a2")], ms$alleles[[l]])
     ok <- !is.na(x) & !is.na(y)
     if (!any(ok)) next
-    p1 <- ms$freq1[[l]]; p2 <- ms$freq2[[l]]
-    xs <- x[ok]; ys <- y[ok]; het <- xs != ys
-    k <- ifelse(het, 2, 1)
-    p11 <- k * p1[xs] * p1[ys]
-    p22 <- k * p2[xs] * p2[ys]
-    p12 <- ifelse(het, p1[xs] * p2[ys] + p1[ys] * p2[xs], p1[xs] * p2[xs])
-    ll[ok, ] <- ll[ok, ] + log(pmax(outer(p11, w11) + outer(p12, w12) + outer(p22, w22), 1e-300))
+    xs <- x[ok]; ys <- y[ok]; tab <- ms$tables[[l]]
+    add <- if (is.null(tab)) genotype_loglik(ms$freq1[[l]], ms$freq2[[l]], xs, ys, w) else
+      tab[genotype_row(xs, ys), , drop = FALSE]
+    if (all(ok)) ll <- ll + add else ll[ok, ] <- ll[ok, ] + add
     n_loci <- n_loci + ok
   }
   best <- max.col(ll, ties.method = "first")
   data.frame(S = grid$S[best], H = grid$H[best], n_markers = n_loci, row.names = rownames(alleles))
+}
+
+# mixture weights of the three ancestry states at each grid point
+grid_weights <- function(grid = ml_grid) list(w11 = 1 - grid$S - grid$H / 2, w12 = grid$H, w22 = grid$S - grid$H / 2)
+
+# log-likelihood of genotypes (allele indices x, y) at one locus at each grid
+# point: rows genotypes, columns grid points. Symmetric in x and y.
+genotype_loglik <- function(p1, p2, x, y, w) {
+  het <- x != y
+  k <- ifelse(het, 2, 1)
+  p11 <- k * p1[x] * p1[y]
+  p22 <- k * p2[x] * p2[y]
+  p12 <- ifelse(het, p1[x] * p2[y] + p1[y] * p2[x], p1[x] * p2[x])
+  log(pmax(outer(p11, w$w11) + outer(p12, w$w12) + outer(p22, w$w22), 1e-300))
+}
+
+# row of genotype (x, y) in a table of all genotypes of a locus
+genotype_row <- function(x, y) {
+  lo <- pmin(x, y); hi <- pmax(x, y)
+  hi * (hi - 1) / 2 + lo
+}
+
+# Tables of genotype_loglik() for every genotype of each locus, so that the
+# many samples scored in simulations need only additions, not logs; scores
+# are the same as without tables. Loci with more than `max_alleles` alleles
+# (tables over about 9 MB) are computed directly instead.
+microsat_tables <- function(ms, max_alleles = 40) {
+  w <- grid_weights()
+  ms$tables <- list()
+  for (l in ms$loci) {
+    k <- length(ms$alleles[[l]])
+    if (k > max_alleles) next
+    ms$tables[[l]] <- genotype_loglik(ms$freq1[[l]], ms$freq2[[l]], sequence(seq_len(k)),
+                                      rep(seq_len(k), seq_len(k)), w)
+  }
+  ms
 }
 
 # draw observed microsatellite alleles from each copy's species of origin

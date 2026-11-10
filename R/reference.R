@@ -66,7 +66,8 @@
 #'   multiplied in each history, for an uncertain recombination rate (for
 #'   example, positions in Mb with `map_scale = c(0.5, 3)` for 0.5-3 cM per
 #'   Mb).
-#' @param cores Number of processes (forked; 1 on Windows).
+#' @param cores Number of processes: forked on macOS and Linux, a socket
+#'   cluster on Windows. Results are the same for any number.
 #' @param seed Base random seed; run `i` uses `seed + i`.
 #' @return A data.frame of all generations of all runs, with the run's
 #'   settings (`run`, `breeders`, `start_mix`, `arrival1`, `arrival2` and
@@ -88,7 +89,10 @@ build_reference <- function(n_sims = 4000, generations = 50, breeders = c(10, 50
                             het_dropout = c(0, 0.3), freq = NULL, microsat = NULL, founder_impurity = c(0, 0),
                             founder_samples = FALSE, class_settings = NULL, cores = 1, seed = 1) {
   if (is.null(class_settings)) class_settings <- hybridclock::class_settings()
-  if (!is.null(microsat)) n_markers <- length(microsat$loci)
+  if (!is.null(microsat)) {
+    n_markers <- length(microsat$loci)
+    microsat <- microsat_tables(microsat)   # once for all runs
+  }
   founders <- match.arg(founders, c("pure", "F1", "BC1_1", "BC1_2"), several.ok = TRUE)
   one <- function(i) with_seed(seed + i, {
     N <- round(exp(stats::runif(1, log(breeders[1]), log(breeders[2]))))
@@ -133,9 +137,7 @@ build_reference <- function(n_sims = 4000, generations = 50, breeders = c(10, 50
           founders = match(fd, c("pure", "F1", "BC1_1", "BC1_2")), chromosomes = chrom, map_cM = len,
           assort = as_, het_dropout = dr, founder_impurity = imp, s)
   })
-  res <- if (cores > 1 && .Platform$OS.type != "windows") {
-    parallel::mclapply(seq_len(n_sims), one, mc.cores = cores)
-  } else lapply(seq_len(n_sims), one)
+  res <- run_tasks(seq_len(n_sims), one, cores)
   bad <- vapply(res, inherits, NA, "try-error")
   if (any(bad)) stop("Some simulations failed: ", as.character(res[[which(bad)[1]]]), call. = FALSE)
   out <- do.call(rbind, res)

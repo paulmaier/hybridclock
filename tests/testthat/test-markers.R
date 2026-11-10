@@ -59,6 +59,15 @@ test_that("microsatellite scores recover pure animals and F1s", {
   expect_lt(mean(sc$S[g == "sp1"]), 0.05)
   expect_gt(mean(sc$S[g == "sp2"]), 0.95)
   expect_gt(mean(sc$H[g == "F1"]), 0.85)
+  # tabulated genotype likelihoods (as in simulations) give the same scores,
+  # with missing and unseen alleles, and with loci too large to tabulate
+  a2 <- a; a2[1:3, 1] <- NA; a2[4:6, 4] <- 999; a2[7, 5:6] <- a2[7, 6:5]
+  expect_identical(hybrid_scores_microsat(a2, hybridclock:::microsat_tables(ms)), hybrid_scores_microsat(a2, ms))
+  none <- hybridclock:::microsat_tables(ms, max_alleles = 1)
+  expect_length(none$tables, 0)
+  expect_identical(hybrid_scores_microsat(a2, none), hybrid_scores_microsat(a2, ms))
+  some <- hybridclock:::microsat_tables(ms); some$tables <- some$tables[c(1, 4, 9)]
+  expect_identical(hybrid_scores_microsat(a2, some), hybrid_scores_microsat(a2, ms))
   s <- simulate_hybrid_zone(generations = 2, breeders = 50, microsat = ms, sample_size = 20, seed = 2)
   expect_equal(nrow(s), 2)
   cl <- classify_hybrids_microsat(a, ms)

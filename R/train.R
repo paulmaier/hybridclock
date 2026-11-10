@@ -49,7 +49,8 @@
 #'   centred on the estimate, scaled by a forest's prediction of each
 #'   sample's typical error, and calibrated on held-out runs; Papadopoulos
 #'   et al. 2011).
-#' @param cores Number of processes (targets are fitted in parallel).
+#' @param cores Number of processes (targets are fitted in parallel). Forked,
+#'   so 1 on Windows; training takes minutes, not the hours a reference can.
 #' @param seed Random seed.
 #' @return An object of class `hybridclock_model`: the fitted models, the
 #'   interval calibration, the features used, the reference settings and a

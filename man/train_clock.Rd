@@ -47,7 +47,8 @@ centred on the estimate, scaled by a forest's prediction of each
 sample's typical error, and calibrated on held-out runs; Papadopoulos
 et al. 2011).}
 
-\item{cores}{Number of processes (targets are fitted in parallel).}
+\item{cores}{Number of processes (targets are fitted in parallel). Forked,
+so 1 on Windows; training takes minutes, not the hours a reference can.}
 
 \item{seed}{Random seed.}
 }
