@@ -160,7 +160,8 @@ build_reference(
 
 - cores:
 
-  Number of processes (forked; 1 on Windows).
+  Number of processes: forked on macOS and Linux, a socket cluster on
+  Windows. Results are the same for any number.
 
 - seed:
 

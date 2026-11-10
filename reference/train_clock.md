@@ -74,7 +74,8 @@ train_clock(
 
 - cores:
 
-  Number of processes (targets are fitted in parallel).
+  Number of processes (targets are fitted in parallel). Forked, so 1 on
+  Windows; training takes minutes, not the hours a reference can.
 
 - seed:
 
